@@ -1,0 +1,11 @@
+# Operating System Files
+.DS_Store
+
+
+# Environment Variables
+.env
+.env.local
+
+# Dependencies and Build Output
+node_modules/
+dist/
