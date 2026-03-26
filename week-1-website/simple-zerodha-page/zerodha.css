@@ -1,0 +1,126 @@
+.topLink {
+  color: rgb(139, 139, 139);
+  padding-right: 20px;
+  font-size: 20px;
+  cursor: pointer;
+}
+.topLink:hover {
+  color: rgb(63, 120, 233);
+}
+
+.signup-button:hover {
+  color: red;
+}
+
+main {
+  display: flex;
+  margin: 0px 100px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.header {
+  background: white;
+  padding: 20px 40px;
+  border: 1px solid rgb(221, 221, 221);
+  display: flex;
+  justify-content: space-between;
+  width: 100vw;
+  box-sizing: border-box;
+  position: sticky;
+  top: 0px;
+}
+.btn {
+  background-color: rgb(75, 120, 234);
+  padding: 15px 45px;
+  border-radius: 4px;
+  color: white;
+  font-size: 20px;
+  margin-top: 40px;
+}
+.btn:hover {
+  background-color: black;
+  cursor: pointer;
+}
+.landingImage {
+  width: 90vmin;
+  max-width: 1500px;
+}
+
+.section2 {
+  /* background-color: yellow; */
+  margin-top: 200px;
+  margin-bottom: 200px;
+  margin-left: 50px;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.text2 {
+  width: 45%;
+  max-width: 800px;
+  font-size: 20px;
+  line-height: 40px;
+}
+.text2 h3 {
+  margin-top: 20px;
+  color: var(--primary-text-color);
+}
+.text2 p {
+  color: var(--secondary-text-color);
+}
+.ecosystemImage {
+  width: 50%;
+  max-width: 800px;
+}
+.ecosystemImage img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.section3 {
+  /* background-color: yellow; */
+  margin-bottom: 200px;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.text3 {
+  width: 40%;
+  max-width: 800px;
+  font-size: 20px;
+  line-height: 40px;
+}
+.text3 h3 {
+  margin-top: 20px;
+  color: var(--primary-text-color);
+}
+.text3 p {
+  color: var(--secondary-text-color);
+}
+.educationImage {
+  width: 50%;
+  margin-right: 5%;
+  max-width: 800px;
+}
+.educationImage img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media screen and (max-width: 1000px) {
+  .section2 {
+    flex-direction: column;
+  }
+  .text2,
+  .ecosystemImage {
+    width: 90%;
+  }
+}

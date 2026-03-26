@@ -1,0 +1,10 @@
+body{
+    background-color: #0e0e0e; 
+    color: #ababab
+}
+
+.topLink{
+    color: #aaaaaa;
+    cursor: pointer;
+    padding-left: 20px;
+}
