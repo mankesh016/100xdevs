@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todo list</title>
+</head>
+
+<body>
+  <h3>Timer:</h3>
+
+  <h1>Todo list</h1>
+  <div>
+    <h4>1. take a class</h4>
+    <h4>2. go to gym</h4>
+  </div>
+
+  <input type="text" placeholder="add task" />
+  <button onclick="handleAddClick()">Add</button>
+  <button onclick="handleDeleteClick()">Delete</button>
+  <script>
+    let counter = 3;
+
+    let timer = 1;
+    setInterval(() => {
+      document.querySelector("h3").innerText = "Timer: " + timer++;
+    }, 1000);
+
+    function handleDeleteClick() {
+      const tasks = document.querySelectorAll("h4");
+      const lastTask = tasks[tasks.length - 1];
+      console.log(lastTask);
+      counter--;
+      lastTask.parentNode.removeChild(lastTask);
+    }
+
+    function handleAddClick() {
+      const input = document.querySelector("input");
+
+      if (input.value) {
+        const newTask = document.createElement("h4");
+        newTask.innerText = counter++ + ". " + input.value;
+
+        console.log(newTask);
+        input.insertAdjacentElement("beforebegin", newTask);
+
+        input.value = "";
+      }
+    }
+  </script>
+</body>
+
+</html>

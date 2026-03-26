@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todo list</title>
+</head>
+
+<style>
+  .container div {
+    padding: 10px;
+  }
+
+  .container span {
+    margin-right: 10px;
+  }
+</style>
+
+<body>
+  <h1>Todo list</h1>
+  <input type="text" placeholder="add task" />
+  <button onclick="handleAddClick()">Add</button>
+
+  <div class="container">
+    <div class="todo-1">
+      <span>go to gym</span>
+      <button onclick="handleDeleteClick(1)">Delete</button>
+    </div>
+  </div>
+
+  <script>
+    let counter = 2;
+
+    function handleDeleteClick(index) {
+      const task = document.querySelector(".todo-" + index);
+      task.parentNode.removeChild(task);
+    }
+
+    function handleAddClick() {
+      const input = document.querySelector("input");
+      if (input.value) {
+        const spanEl = document.createElement("span");
+        const buttonEl = document.createElement("button");
+        spanEl.textContent = input.value;
+        buttonEl.textContent = "Delete";
+        buttonEl.setAttribute("onclick", `handleDeleteClick(${counter})`);
+
+        const divEl = document.createElement("div");
+        divEl.appendChild(spanEl);
+        divEl.appendChild(buttonEl);
+
+        divEl.setAttribute("class", "todo-" + counter);
+
+        counter++;
+        document
+          .querySelector(".container")
+          .insertAdjacentElement("beforeend", divEl);
+
+        input.value = "";
+      }
+    }
+  </script>
+</body>
+
+</html>

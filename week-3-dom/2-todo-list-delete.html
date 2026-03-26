@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todo list</title>
+</head>
+
+<body>
+  <div>
+    <h1>Todo list</h1>
+  </div>
+
+  <div class="container">
+    <div class="todo-1" style="margin:10px; display: flex">
+      <div>continue react</div>
+      <button style="margin-left: 10px;" onclick="handleDeleteClick(1)">Delete</button>
+    </div>
+
+    <div class="todo-2" style="margin:10px; display: flex">
+      <div>go to gym</div>
+      <button style="margin-left: 10px;" onclick="handleDeleteClick(2)">Delete</button>
+    </div>
+  </div>
+
+  <div>
+    <input type="text" placeholder="add task" />
+    <button onclick="handleAddClick()">Add</button>
+  </div>
+
+  <script>
+    let counter = 3;
+
+    function handleDeleteClick(index) {
+      console.log(index);
+      const task = document.querySelector(".todo-" + index);
+      console.log(task);
+      task.parentNode.removeChild(task);
+    }
+
+    function handleAddClick() {
+      const input = document.querySelector("input");
+      console.log(input.value);
+      if (input.value) {
+        const newTask = document.createElement("div");
+        newTask.setAttribute("class", "todo-" + counter);
+        newTask.setAttribute("style", "margin:10px; display: flex");
+
+        newTask.innerHTML = `<div>${input.value}</div> <button style="margin-left: 10px;" onclick="handleDeleteClick(${counter})">Delete</button>`;
+
+        counter++;
+        console.log(newTask);
+        document
+          .querySelector(".container")
+          .insertAdjacentElement("beforeend", newTask);
+        input.value = "";
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo list</title>
+</head>
+<!-- Assignment: add checkbox and edit functionalties to todo app without using react -->
+
+<style>
+    .container div {
+        padding: 10px;
+    }
+
+    .container span {
+        margin-right: 10px;
+    }
+</style>
+
+<body>
+    <h1>Todo list</h1>
+
+    <input type="text" placeholder="add task" />
+    <button onclick="handleAddClick()">Add</button>
+
+    <div class="container">
+        <div class="todo-1">
+            <input type="checkbox" onchange="handleCheckboxChange(this)" />
+            <span>tasks will be shown here</span>
+            <button onclick="handleDeleteClick(this)" id="5">Delete</button>
+        </div>
+    </div>
+
+    <script>
+        let counter = 2;
+        const todos = [];
+
+        function handleCheckboxChange(button) {
+            const idx = button.parentElement.id;
+            todos[idx].checked = (!todos[idx].checked);
+            render();
+        }
+        function handleDeleteClick(button) {
+            todos.splice(button.parentElement.id, 1);
+            render();
+        }
+
+        function createTodoComponent(value, checked, id) {
+            const inputEl = document.createElement("input");
+            inputEl.setAttribute("type", "checkbox");
+            inputEl.setAttribute("onchange", "handleCheckboxChange(this)");
+            if (checked) inputEl.checked = true;
+
+            const spanEl = document.createElement("span");
+            const buttonEl = document.createElement("button");
+
+            if (checked) spanEl.innerHTML = "<strike>" + value + "</strike>";
+            else spanEl.innerHTML = value;
+
+            buttonEl.textContent = "Delete";
+            buttonEl.setAttribute("onclick", `handleDeleteClick(this)`);
+
+            const divEl = document.createElement("div");
+            divEl.setAttribute("id", id);
+
+            divEl.appendChild(inputEl);
+            divEl.appendChild(spanEl);
+            divEl.appendChild(buttonEl);
+
+            // divEl.setAttribute("class", "todo-" + counter);
+            return divEl;
+        }
+
+        function render() {
+            counter = 0;
+            const container = document.querySelector(".container");
+            container.innerHTML = "";
+            todos.forEach((todo) => {
+                const divElement = createTodoComponent(todo.title, todo.checked, counter++);
+                container.insertAdjacentElement("beforeend", divElement);
+            });
+        }
+
+        function handleAddClick() {
+            const input = document.querySelector("input");
+            if (input.value) {
+                todos.push({ title: input.value, checked: false });
+                input.value = "";
+                render();
+            }
+        }
+    </script>
+</body>
+
+</html>
+
+<!-- Assignment: add checkbox and edit functionalties to todo app without using react -->
