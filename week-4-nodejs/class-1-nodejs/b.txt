@@ -1,0 +1,3 @@
+random data in b.txt file
+its second line
+to count the lines in the file
