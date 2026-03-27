@@ -1,0 +1,51 @@
+const express = require("express");
+
+const app = express();
+// create a middleware with logs, method, url, timestamp
+
+function middleware(req, res, next) {
+  console.log(req.method);
+  console.log(req.host + req.url);
+  console.log("Date: ", Date());
+  next();
+}
+
+app.use(middleware);
+
+app.get("/sum/:a/:b", function (req, res) {
+  const a = parseInt(req.params.a);
+  const b = parseInt(req.params.b);
+
+  res.json({
+    ans: a + b,
+  });
+});
+
+app.get("/multiply/:a/:b", function (req, res) {
+  const a = parseInt(req.params.a);
+  const b = parseInt(req.params.b);
+
+  res.json({
+    ans: a * b,
+  });
+});
+
+app.get("/divide/:a/:b", function (req, res) {
+  const a = parseInt(req.params.a);
+  const b = parseInt(req.params.b);
+
+  res.json({
+    ans: a / b,
+  });
+});
+
+app.get("/subtract/:a/:b", function (req, res) {
+  const a = parseInt(req.params.a);
+  const b = parseInt(req.params.b);
+
+  res.json({
+    ans: a - b,
+  });
+});
+
+app.listen(3000);
