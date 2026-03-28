@@ -21,6 +21,7 @@ This repository tracks my progress through the **100xdevs** cohort. It contains 
 | **Week 4** | **Node & CLI**  | Built a File-based CLI (Commander/Chalk) and first Express server |
 | **Week 5** | **Middleware**  | Middlewares, CORS, and data fetching with Fetch API & Axios.      |
 | **Week 6** | **Auth & JWT**  | Implemented User Authentication using JSON Web Tokens (JWT).      |
+| **Week 7** | **Database**    | Integrated MongoDB with Mongoose for persistent data storage.     |
 | **Week +** | **...**         | _Pushing daily - Updates incoming..._                             |
 
 ---
