@@ -26,6 +26,7 @@ This repository tracks my progress through the **100xdevs** cohort. It contains 
 | **Week 9**  | **React Foundations**      | Contains useState, useEffect, and component lifecycle (Mounting/Unmounting).   |
 | **Week 10** | **React Intermediate**     | Contains SPAs with React Router, useRef, Context API to solve Prop Drilling.   |
 | **Week 11** | **React Advanced**         | Deep dive into Custom Hooks (Debouncing) and Recoil (Atom Families/Loadables). |
+| **Week 12** | **UI/UX Design**           | Includes Typography, Color Theory, UX Laws and Figma design.                   |
 | **Week +**  | **...**                    | _Pushing daily - Updates incoming..._                                          |
 
 ---
@@ -34,5 +35,5 @@ This repository tracks my progress through the **100xdevs** cohort. It contains 
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/mankesh016/100xdevs.git](https://github.com/mankesh016/100xdevs.git)
+   git clone https://github.com/mankesh016/100xdevs.git
    ```
