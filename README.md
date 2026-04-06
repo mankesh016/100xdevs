@@ -27,6 +27,7 @@ This repository tracks my progress through the **100xdevs** cohort. It contains 
 | **Week 10** | **React Intermediate**     | Contains SPAs with React Router, useRef, Context API to solve Prop Drilling.   |
 | **Week 11** | **React Advanced**         | Deep dive into Custom Hooks (Debouncing) and Recoil (Atom Families/Loadables). |
 | **Week 12** | **UI/UX Design**           | Includes Typography, Color Theory, UX Laws and Figma design.                   |
+| **Week 13** | **Tailwind CSS**           | Utility-first styling, CSS transitions, and managing Ref Arrays in React.      |
 | **Week +**  | **...**                    | _Pushing daily - Updates incoming..._                                          |
 
 ---
