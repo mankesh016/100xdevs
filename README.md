@@ -29,6 +29,7 @@ This repository tracks my progress through the **100xdevs** cohort. It contains 
 | **Week 12** | **UI/UX Design**           | Includes Typography, Color Theory, UX Laws and Figma design.                   |
 | **Week 13** | **Tailwind CSS**           | Utility-first styling, CSS transitions, and managing Ref Arrays in React.      |
 | **Week 14** | **Typescript**             | Type Safety: Interfaces vs. Types, OOP (Abstract classes), and Advanced Types. |
+| **Week 15** | **Fullstack Project**      | Integrated Frontend and Backend for note-taking and content management.        |
 | **Week +**  | **...**                    | _Pushing daily - Updates incoming..._                                          |
 
 ---
