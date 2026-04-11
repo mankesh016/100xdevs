@@ -1,0 +1,32 @@
+Intro:
+Context
+Relationships
+Transactions
+Joins
+Types of Joins
+Conclusion and Q&A
+
+Notes: 
+https://projects.100xdevs.com/tracks/YOSAherHkqWXhOdlE4yE/sql-1
+
+
+CREATE TABLE users(
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(20) UNIQUE NOT NULL,
+  password VARCHAR(50) NOT NULL
+)
+
+CREATE TABLE addresses(
+  id SERIAL PRIMARY KEY,
+  userId INTEGER NOT NULL,
+  city VARCHAR(50) NOT NULL,
+  country VARCHAR(50) NOT NULL,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+)
+
+
+TYPES OF JOINS :
+INNER JOIN (default)
+LEFT JOIN
+RIGHT JOIN
+FULL JOIN

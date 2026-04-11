@@ -1,0 +1,22 @@
+Context
+Types of Databases
+Why not NoSQL
+Why SQL
+Creating a database
+psql and pg
+Tables and Schemas
+Interacting with the database
+How to do queries from a Node.js app?
+Building Todo app
+SQL injection
+Conclusion and Q&A
+
+Notes: 
+https://projects.100xdevs.com/tracks/YOSAherHkqWXhOdlE4yE/sql-1
+
+
+CREATE TABLE users(
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(20) UNIQUE NOT NULL,
+  password VARCHAR(50) NOT NULL
+)
