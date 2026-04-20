@@ -1,6 +1,6 @@
 # PostgreSQL
 
-# Project Commands
+# Project Commands - Class-1
 
 ```bash
 npm init
@@ -38,6 +38,9 @@ npx prisma generate
 npm run dev
 npx prisma studio
 
+// "postinstall": "prisma generate", // automatically generates client after npm install
+// "seed": "npx tsx prisma/seed.ts"
+npm run seed
 ```
 
 ##### Debug with Cline!
@@ -53,4 +56,5 @@ prisma migrate
 pg //The node-postgres database driver
 @types/pg
 dotenv
+
 ```

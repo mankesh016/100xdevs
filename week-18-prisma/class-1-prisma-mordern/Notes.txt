@@ -1,5 +1,4 @@
-Class 1
-
+Class - 1
 Context
 What are ORMs
 Why ORMs
@@ -14,8 +13,14 @@ Expressify it
 Conclusion and Q&A
 
 
-Notes:
-https://projects.100xdevs.com/tracks/gZf9uBBNSbBR7UCqyyqT/prisma-1
 
 
 
+Todos
+How the query look like, 
+One to One, One to Many, Many to One, Many to Many Relationship,
+
+
+// added seed values, 
+// "seed": "npx tsx prisma/seed.ts"
+// npm run seed
