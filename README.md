@@ -32,6 +32,7 @@ This repository tracks my progress through the **100xdevs** cohort. It contains 
 | **Week 15** | **Fullstack Project**      | Integrated Frontend and Backend for note-taking and content management.        |
 | **Week 16** | **Websockets**             | Mastered WebSockets for bi-directional, low-latency communication.             |
 | **Week 17** | **PostgreSQL**             | Schema design, Relationships, Joins, and Transactions.                         |
+| **Week 18** | **Prisma ORM & SSR**       | Migrated to Prisma ORM for type-safe DB queries and started Next.js.           |
 | **Week +**  | **...**                    | _Pushing daily - Updates incoming..._                                          |
 
 ---

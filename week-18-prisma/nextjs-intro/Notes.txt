@@ -1,0 +1,10 @@
+npm create-next-app@latest ./
+
+npm run dev
+
+// localhost:3000/users
+// localhost:3000/users/admin
+// localhost:3000/signin
+// localhost:3000/blogs
+
+npm i axios
