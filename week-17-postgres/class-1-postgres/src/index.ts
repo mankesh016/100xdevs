@@ -37,3 +37,18 @@ main();
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
+
+// import { Client } from "pg";
+
+// const client = new Client(
+//   "postgresql://neondb_owner:pass@xyz.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+// );
+
+// ECMA Script Modules support top level await,
+// await client.connect();
+// console.log("Connected to the database");
+
+// const response = await client.query("SELECT * FROM users;");
+// console.log(response.rows);
+
+// await client.end();

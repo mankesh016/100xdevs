@@ -1,3 +1,79 @@
+# Class Notes for Week 17.2
+
+Week 17.2
+Postgres And SQL Databases - Part 2 (Relationships, Transactions, Joins)
+
+
+Relationships:
+Users can have multiple addresses.
+One-to-Many Relationship.
+Users Table (id, name, email, password) <-> Addresses Table (id, user_id, city, country, street, pincode).
+
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE addresses (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  city VARCHAR(50) NOT NULL,
+  country VARCHAR(50) NOT NULL,
+  street VARCHAR(255) NOT NULL,
+  pincode VARCHAR(20),
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+ON DELETE CASCADE: 
+When an entry is deleted from the base table (users), the corresponding entries in the referencing tables (addresses) are also deleted.
+
+ON DELETE RESTRICT:
+As long as entries exist in the referencing tables, a specific record cannot be deleted from the base table.
+
+---------------------------------------------------------------------------------------------
+TRANSACTIONS
+Query 1: Reduce balance of sender.
+Query 2: Increase balance of receiver.
+Among these queries, either both should happen, or none of them should happen.
+This is where transactions come into the picture.
+
+BEGIN;
+INSERT INTO Users (columns) VALUES (data);
+INSERT INTO Address (columns) VALUES (data);
+COMMIT;
+
+If it fails in between, then changes get ROLLED BACK.
+
+---------------------------------------------------------------------------------------------
+JOINS
+
+Defining a relationship is easy, but fetching data from two or more tables together is hard.
+Fetch user details and their addresses.
+Bad approach: Use two separate queries.
+
+Good approach: Using Joins.
+SELECT u.id, u.username, u.email, a.city, a.country 
+FROM users u 
+JOIN addresses a ON a.user_id = u.id 
+WHERE u.id = 1;
+
+(Note: Sometimes two queries can be faster than Joins, as Joins multiply both tables (NxM) 
+if ON condition is not specified properly, but modern databases are smart enough to handle Joins effectively.)
+
+Types of JOINS:
+1. JOIN (INNER JOIN): Only matching rows from both tables.
+2. LEFT JOIN: All the rows from the left table + matching rows from the right table. (If there is no matching record in the right table, it returns NULL for those columns).
+3. RIGHT JOIN: All rows from the right table + matching rows from the left table.
+4. FULL JOIN: All rows from left and right tables (combines matching rows and includes non-matching rows with NULLs).
+
+Note:
+In case of JOIN (default INNER JOIN) if there is no entry in corresponding address table for a user, the query will not show even the basic detail of the user.
+Use LEFT JOIN if you want to see the user details even if they don't have an address.
+
+
 Intro:
 Context
 Relationships
@@ -8,25 +84,3 @@ Conclusion and Q&A
 
 Notes: 
 https://projects.100xdevs.com/tracks/YOSAherHkqWXhOdlE4yE/sql-1
-
-
-CREATE TABLE users(
-  id SERIAL PRIMARY KEY,
-  username VARCHAR(20) UNIQUE NOT NULL,
-  password VARCHAR(50) NOT NULL
-)
-
-CREATE TABLE addresses(
-  id SERIAL PRIMARY KEY,
-  userId INTEGER NOT NULL,
-  city VARCHAR(50) NOT NULL,
-  country VARCHAR(50) NOT NULL,
-  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
-)
-
-
-TYPES OF JOINS :
-INNER JOIN (default)
-LEFT JOIN
-RIGHT JOIN
-FULL JOIN

@@ -7,6 +7,7 @@ app.use(express.json());
 
 const pgClient = new pg.Client(process.env.PG_CONNECTION);
 
+// TRANSACTION
 app.post("/signup", async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -41,6 +42,8 @@ app.post("/signup", async (req, res) => {
 
   res.send("User signed up successfully");
 });
+
+// Bad Approch (using two queries)
 app.get("/metadata", async (req, res) => {
   const id = req.query.id;
 
@@ -59,6 +62,7 @@ app.get("/metadata", async (req, res) => {
   });
 });
 
+// Good Approch (Using Joins)
 app.get("/better-metadata", async (req, res) => {
   const id = req.query.id;
 

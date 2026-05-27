@@ -1,3 +1,163 @@
+# Class Notes for Week 17.1
+
+Week 17.1 
+Postgres and SQL Databases - Class 1
+
+Inspect API request, if you see '_id', then MongoDB is being used.
+MongoDB is horizontally scalable.
+MongoDB is a NoSQL database. NoSQL is easy to write.
+In kiddy hackathon project (People prefer MongoDB).
+Firebase is also NoSQL (very bad at scale, difficult to migrate).
+
+Types of Databases:
+1. NoSQL databases: Store data in a schemaless fashion. 
+We define the schema, but MongoDB is inherently schemaless. Mongoose enforces the schema at the Node.js level.
+2. Graph Databases: Neo4j (Useful for Social Networks).
+3. Vector Databases: Useful in Machine Learning, text-> embedding model -> objects as vector -> vector database. Examples: Pinecone.
+4. SQL Databases: Store data in the form of rows. Most full-stack applications use this. Examples: MySQL, Postgres (preferred).
+
+-------------------------------------------------------------------------------------------
+Schema can be changed in SQL database as app changes.
+Migrations happens when schema is changed in SQL database.
+
+Steps to use a SQL database:
+1. Run the database.
+2. Create a table and define its schema.
+3. Using a library, connect to the DB and put data.
+4. Run queries on the database to interact with the data (insert/update/delete).
+
+Start Postgres Database (on neon.tech, it's free and easy to use):
+New Project -> Project Name -> Create Project
+Connection string (Postgres URL):
+postgresql://username:password@host/database 
+
+pgAdmin: GUI (to connect to Postgres, similar to MongoDB Compass).
+CLI: via terminal using `psql`.
+`\dt` : Lists tables (from psql terminal).
+
+Create Table Command:
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+People usually change thier username/email, so it's not a good idea to make them Primary Keys.
+Auto-incremental count keeps running even for wrong/invalid queries.
+
+Another way:
+CREATE TABLE Users (
+  id INT,
+  username TEXT NOT NULL UNIQUE,
+  CONSTRAINT pk_id PRIMARY KEY (id)
+);
+
+------------------------------------------------------------------------------------------------------
+CRUD OPERATIONS
+
+1. INSERT:
+INSERT INTO users (username, email, password) VALUES ('alice', 'alice@gmail.com', 'pass123');
+
+2. UPDATE:
+UPDATE users SET password = 'new-password' WHERE email = 'user@example.com';
+
+3. DELETE:
+DELETE FROM users WHERE id = 1;
+
+4. SELECT:
+SELECT * FROM users WHERE id = 1;
+
+ALTER TABLE table_name ADD PRIMARY KEY (id);
+Backend talks to the database (you rarely insert/update manually).
+------------------------------------------------------------------------------------------------------
+SQL Injection:
+
+SQL injection may happen when Node.js backend connected to the database.  
+What is SQL injection? (will come up later).
+
+"pg" is a famous Postgres library (like Mongoose for MongoDB). 
+It is a non-blocking PostgreSQL client for Node.js written in pure JavaScript.
+
+Initialize Node.js project:
+npm init -y (to initialize package.json)
+npm install typescript
+npx tsc --init (modify tsconfig: "rootDir": "./src", "outDir": "./dist")
+create src/index.ts
+npm install pg @types/pg
+
+Now we have to create an application that connects to the database. 
+We can create a todo application, an express application, HTTP server, or websocket server. 
+Let's create simple functions which connect to the database.
+
+import { Client } from "pg";
+const client = new Client("connection_string");
+await client.connect();
+console.log("Connected to database");
+const response = await client.query("SELECT * FROM Users");
+console.log(response.rows);
+await client.end();
+
+To run, go to package.json and add script:
+"dev": "tsc -b && node ./dist/index.js"
+Or manually run: npx tsc -b && node ./dist/index.js
+
+Modern Javascript ECMAScript Module (ESM) supports Top-level await.
+Two ways to enable:
+1. "type": "module" in package.json
+2. Change extension to .mjs
+
+Create Express server, send signup request from Postman and store credentials in the database:
+npm install express @types/express 
+
+Code:
+import express from "express";
+const app = express();
+app.use(express.json());
+
+app.post("/signup", async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  // VULNERABLE CODE (SQL INJECTION):
+  // const query = `INSERT INTO users (username, password) VALUES ('${username}', '${password}');`;
+  // await pgClient.query(query); 
+});
+
+Here we are blindly sending the username and password to the database, but a malicious user can send a string that closes the current query and executes another query on the database, potentially deleting something.
+Example malicious input: 
+`'); DELETE FROM users; INSERT INTO users (username, password) VALUES ('user', 'pass`
+
+To avoid this, we send parameters via variables:
+await pgClient.query(
+  "INSERT INTO users (username, password) VALUES ($1, $2)", 
+  [username, password]
+);
+
+Q&A 17.1
+1. What is Connection Pooling in Neon DB?
+Connection pooling is a database optimization technique where instead of opening and closing a physical database connection for every single user request, we maintain a cache of active, long-lived connections and reuse them.
+
+Creating a fresh database connection from scratch is a highly expensive operation because it involves a network handshake, authentication, and memory allocation on the database server. In high-traffic or serverless environments (like AWS Lambda or Neon DB), thousands of rapid requests hitting the database directly would instantly exhaust its memory limits and crash the system.
+
+With pooling, the application simply borrows an already-open, pre-warmed connection from the pool, executes the query instantly, and returns it back to the pool upon completion. A good analogy is a Taxi Stand—instead of manufacturing a new car every time someone wants to travel, passengers just catch an available cab, complete their journey, and return it to the stand for the next passenger.
+
+2. How do we scale SQL databases?
+- Vertically: Add more resources to the machine.
+- Horizontally: Master-Slave architecture. 
+You have more reads than writes in SQL databases. (Master node for write, Slave nodes for read).
+- Sharding is scaling by dividing your application data, but joins are difficult across shards.
+
+Good architecture for a chatting application using websockets:
+- You should scale it.
+- Image/file uploads.
+- Threads/nested threads (someone can reply to you).
+- Tagging (when tag happens, show existing users).
+- Group chats.
+- Dynamic chats (create own group).
+- If a group has 50 people, how does a message reach those 50 people? (Kafka).
+
+
 Context
 Types of Databases
 Why not NoSQL
@@ -13,10 +173,3 @@ Conclusion and Q&A
 
 Notes: 
 https://projects.100xdevs.com/tracks/YOSAherHkqWXhOdlE4yE/sql-1
-
-
-CREATE TABLE users(
-  id SERIAL PRIMARY KEY,
-  username VARCHAR(20) UNIQUE NOT NULL,
-  password VARCHAR(50) NOT NULL
-)
