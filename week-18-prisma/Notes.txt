@@ -1,5 +1,277 @@
-Class 1: Prisma and ORM (Object-Relational Mapping)
+Week 18.1
 
+Prisma And ORMs (last class on Prisma)
+
+What is an ORM (Object Relational Mapping)?
+ORMs are used to abstract the complexities of the underlying database into simpler, more easily managed objects within the code. 
+ORMs let you easily interact with your database without worrying too much about the underlying syntax (like SQL language).
+
+Examples of DB interaction:
+MongoDB (Mongoose): 
+users.findOne({ userId: 1 })
+
+PostgreSQL (pg library): 
+SELECT * FROM users WHERE userId=1
+
+Postgres (Prisma library): 
+prisma.users.findFirst({
+  where: {
+    userId: 1
+  }
+})
+-----------------------------------------------------------------------------------------------
+WHY ORMs?
+1) Simpler Syntax: 
+Converts Javascript Objects to SQL queries under the hood.
+Instead of writing:
+const query = "SELECT * FROM users WHERE email=$1";
+const result = await client.query(query, ["alice@gmail.com"]);
+
+You can just write:
+users.find({
+  email: "alice@gmail.com"
+})
+
+2) Abstraction: 
+Lets you flip the database you are using. It provides a unified API irrespective of the Database.
+(Even if you switch from Postgres to MySQL, you won't have to change your application code).
+ORM: users.find({email: "alice@gmail.com"})
+it automatically Converts above query according to the database you are using.
+MongoDB -> mongoose.find({email: "alice@gmail.com"})
+MySQL/Postgres -> SELECT * FROM users WHERE email="alice@gmail.com"
+
+3) Type Safety / Auto Completion:
+Using a raw SQL client:
+const result = await client.query(query, ["alice@gmail.com"]); 
+// The type of result is 'any'. The IDE doesn't know what's written in the query.
+
+Using an ORM (like Prisma):
+const user = UserDb.find({ email: "alice@gmail.com" });
+// Your code editor will suggest autocompletion for user properties like user.email, user.username, user.password.
+
+4) Automatic Migrations:
+In the case of a simple Postgres app, it's very hard to keep track of all the SQL commands that were run to reach the current schema of the table.
+Example SQL Migrations:
+CREATE TABLE users( 
+    id SERIAL PRIMARY KEY, 
+    username VARCHAR(50) UNIQUE NOT NULL, 
+    password VARCHAR(255) UNIQUE NOT NULL,
+);
+ALTER TABLE users ADD COLUMN age INTEGER;
+
+These are called migrations. Migrations need to be shared with other developers.
+In the `pg` library, you need to do it manually. But in Prisma, migrations are automatically generated. Prisma is a very popular ORM.
+-----------------------------------------------------------------------------------------------
+Prisma: 
+Next-generation Node.js and Typescript ORM
+
+Benefits of using Prisma:
+- Data model: Define your schema in a single file. You can make changes to this file, and migrations will be automatically generated.
+- Automatic migration: Based on the changes in Prisma schema, it automatically generates SQL migrations.
+- Type Safety & Autocomplete.
+
+-----------------------------------------------------------------------------------------------
+Initialize an Empty Typescript project:
+npm init -y // empty nodejs project
+npm install typescript
+npx tsc --init // initialize typescript
+
+In tsconfig.json:
+"rootDir": "./src"
+"outDir": "./dist"
+
+In package.json:
+"scripts": {
+  "dev": "tsc -b && node ./dist/index.js"
+}
+npm run dev
+
+The above steps are common for any Typescript project.
+----------------------------------------------------------------------------------------------
+Now install and Initialize Prisma:
+
+npm install prisma
+npx prisma init // Initializes a fresh prisma setup, it creates schema.prisma file. 
+schema.prisma contains your data models and some extra configuration at the top.
+For example, `datasource` tells Prisma which database is currently being used (Prisma can be used with MongoDB, MySQL, PostgreSQL). It also requires the `url` (where is the PostgreSQL database connection string).
+
+add user model to schema.prisma:
+model Users {
+  id Int @id @default(autoincrement())
+  username String @unique
+  password String
+  age Int?
+}
+
+Run Migration:
+npx prisma migrate dev --name name_of_migration
+(Add the Prisma extension in VS Code to see the schema.prisma file colored properly).
+
+If you build and run it, and want to add another model:
+model Todos {
+  id Int @id @default(autoincrement())
+  title String
+  status Boolean @default(false)
+  userId Int
+}
+
+Run Migration again:
+npx prisma migrate dev --name added_todos
+
+(Note: If you create a new column in an existing model, make sure to make it optional or give it a default value so it doesn't break existing entries in the database).
+----------------------------------------------------------------------------------------------
+Next Step: Generating the Prisma Client
+
+Generating the client causes a bunch of errors. 
+The client allows you to connect to the database from Node.js (e.g., Client.user.update(), Client.user.insert(), Client.user.get()).
+
+To generate the client, you run:
+npx prisma generate
+(`npx prisma migrate` and `npx prisma generate` are two commands you will use very frequently).
+
+Normally, npm packages (bringed with `npm install`) go inside the `node_modules` folder. 
+However, Prisma actually generates the client files inside `node_modules/@prisma/client`.
+Note: In newer versions of Prisma, you can specify it to be generated in folder like `/src/generated/prisma`.
+----------------------------------------------------------------------------------------------
+Using the Prisma Client:
+
+import { PrismaClient } from '@prisma/client';
+const client = new PrismaClient();
+
+async function createUser() {
+  const user = await client.users.create({
+    data: {
+      username: "bob123",
+      password: "random128", // hash this using bcrypt/argon2
+      age: 20
+    }
+  });
+  console.log("User created");
+
+  const allUsers = await client.users.findMany();
+  console.log("All users:", JSON.stringify(allUsers));
+}
+
+Finding a specific user and selecting fields:
+client.users.findMany({
+  where: { id: 100 },
+  select: { username: true }
+});
+----------------------------------------------------------------------------------------------
+Relationships:
+
+You need to define relationships (foreign keys) upfront in the Prisma schema.
+You have to tell the User model that it can have multiple Todos (Note: this specific line doesn't reach the database as a SQL column, it's just a Prisma abstraction).
+
+model Users {
+  id Int @id @default(autoincrement())
+  // ... other fields
+  todos Todos[]
+}
+
+model Todos {
+  id Int @id @default(autoincrement())
+  // ... other fields
+  userId Int 
+  User Users @relation(fields: [userId], references: [id])
+}
+
+When you run `npx prisma migrate dev`, it by default also runs `prisma generate` to update the client.
+
+What the migration does under the hood (SQL):
+ALTER TABLE Todos ADD CONSTRAINT "todos_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+Types of Relationships: One-to-many, One-to-one, Many-to-one, Many-to-Many.
+----------------------------------------------------------------------------------------------
+Assignment:
+
+Try creating a Todo application that lets the user signup, put todos, and fetch todos.
+Use:
+1) Typescript as the language.
+2) Prisma as ORM.
+3) Postgres as database.
+4) Zod as the validation library.
+----------------------------------------------------------------------------------------------
+Adding Express logic to existing code:
+
+npm install express @types/express
+
+import express from 'express';
+const app = express();
+app.use(express.json());
+
+app.get("/users", async (req, res) => {
+  const users = await prisma.users.findMany();
+  res.json(users);
+});
+
+app.get("/todos/:id", async (req, res) => {
+  const todos = await prisma.todos.findMany({
+    where: {
+      userId: Number(req.params.id)
+    }
+  });
+  res.json(todos);
+});
+
+app.listen(3000, () => console.log("Server running on post 3000..."));
+
+npm run dev
+Send a GET request to localhost:3000/users (This will list all the users).
+To see todos of a particular user, send a GET request to localhost:3000/todos/[userid].
+----------------------------------------------------------------------------------------------
+Q&A 18.1
+
+Seed File:
+You can create a seed.ts file in Prisma to add dummy data to the tables. (Command: `npx prisma db seed`).
+
+
+Add the following to the package.json file:
+"prisma": {
+    "seed": "ts-node prisma/seed.ts"
+}
+npm i -D ts-node typescript @types/node
+
+npx prisma db seed
+🌱  The seed command has been executed.
+
+Setup faker for generating random data:
+npm install @faker-js/faker --save-dev
+
+import { faker } from "@faker-js/faker";
+
+for (let i = 0; i < 10; i++) {
+    // Generate a unique username by adding a random number or suffix
+    const mockUsername = `${faker.internet.username()}_${faker.number.int({ min: 10, max: 99 })}`;
+
+    await prisma.user.create({
+      data: {
+        username: mockUsername,
+        password: faker.internet.password(), // Simulated plain text/hashed password
+        age: faker.number.int({ min: 18, max: 60 }), // Generates age between 18 and 60
+        city: faker.location.city(),
+        todos: {
+          create: [
+            {
+              title: faker.hacker.verb() + " " + faker.hacker.noun(), // e.g., "override primary matrix"
+              completed: faker.datatype.boolean(),
+            },
+            {
+              title: faker.git.commitMessage(), // e.g., "fix: resolve merge conflict"
+              completed: faker.datatype.boolean(),
+            },
+            {
+              title: faker.lorem.sentence({ min: 3, max: 7 }),
+              completed: faker.datatype.boolean(),
+            },
+          ],
+        },
+      },
+    });
+  }
+
+npx prisma db seed 
+----------------------------------------------------------------------------------------------
 Context
 What are ORMs
 Why ORMs
@@ -13,23 +285,7 @@ Relationships
 Expressify it
 Conclusion and Q&A
 
-Class 2: Nextjs and SSR
-
-Intro:
-00:01:17 - NextJS intro, Pre-requisites
-00:12:46 - SEO Optimisation
-00:21:57 - Waterfalling problem
-00:26:35 - Next.js offerings
-00:37:50 - Bootstrap a Next app
-00:43:54 - Routing in Next
-00:53:38 - Prettify the signin page
-00:55:43 - Server side rendering
-01:07:40 - Q&A
-01:17:53 - Layouts
-01:31:20-02:01:38 - Conclusion and Q&A
-
-Notes:
+Class Notes:
 https://projects.100xdevs.com/tracks/gZf9uBBNSbBR7UCqyyqT/prisma-1
 
-
-
+Notes: 18.2 class on Nextjs, moved to week 19.0
