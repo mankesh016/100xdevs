@@ -1,0 +1,183 @@
+Week 19.0
+
+Introduction to Next.js and SSR (class 0)
+
+Prerequisites:
+- React
+- Tailwind CSS
+- TypeScript
+(Prisma is not a prerequisite).
+Next.js is not difficult if you know React well. 
+
+Topics: Client-side Rendering (CSR) vs. Server-side Rendering (SSR).
+
+React had some shortcomings, and the React team wasn't fixing them fast enough. So, other frameworks like Remix and Next.js came into picture. They were built on top of React but tried to fix some of its inconsistencies. 
+React is a great framework, but Next.js builds upon react, offers more.
+
+React's Disadvantages:
+1. Separate Frontend and Backend: React is not a backend framework. You have to maintain a separate backend project (like Node.js/Express) for your API routes.
+2. No Built-in Routing: React does not provide built-in routing; you have to use external libraries like `react-router-dom`.
+3. Not SEO Optimized: React applications are generally not optimized for Search Engine Optimization (SEO).
+4. Waterfalling Problem: Sequential fetching of resources causes delays in rendering.
+
+React is very good at reconciliation (using a diffing engine to figure out what structural changes happened in the DOM). 
+`react-dom` actually renders these changes.
+`react-router-dom` handles frontend routing. 
+When a user navigates to a page, it renders the component WITHOUT making a new request to the backend. 
+The browser does NOT request a new HTML page.
+Conversely, an Express backend handles server-side routing.
+
+Understanding Routing (React):
+In React, we use `react-router-dom` like this:
+<Routes>
+  <Route path="/" component={<Landing/>} />
+  <Route path="/profile" component={<Profile/>} />
+</Routes>
+Next.js have file based routing
+
+Next.js is a Full-Stack Framework:
+Next.js is both a frontend and backend framework. You can create your backend directly within Next.js and connect it to a database. It allows you to have a single repository for both frontend and backend.
+
+Does Next.js use Express?
+No. Next.js has its own implementation for backend API routes.
+- `localhost:3000` -> Returns some HTML (Frontend server).
+- `localhost:3000/api/v1/user` -> Returns some JSON data (Backend API).
+
+HTML/CSS websites are highly SEO optimized. 
+Next.js is optimized. React is not.
+
+Why React is NOT SEO Optimized:
+
+Google/Bing use crawlers to figure out what a website does. They rank pages based on the HTML they receive. 
+Traditionally, crawlers DO NOT run JavaScript to render your page and see the final output.
+React gives you an empty HTML file initially. The content only appears after the JavaScript runs on the client machine.
+Although modern crawlers *can* run JavaScript now, it is a difficult and heavy task for them. Therefore, a crawler may or may not run your JS.
+A workaround some people use: Detect if the request is coming from a bot, and if so, somehow send them pre-rendered HTML with content. Next.js solves this natively.
+
+The Waterfalling Problem in React:
+1. Browser asks for HTML.
+<< Server returns an empty HTML file with a `<script>` tag.
+2. The `<script>` tag tells the browser, "I need this JS file.". Browser asks for the JS file.
+<< Server returns the JS file.
+3. Browser runs the JS file. JS execution triggers an API call (e.g., fetch blogs from the backend).
+<< Backend returns the blogs.
+
+This process requires sequential requests, not parallel, making the initial load slower.
+
+What Next.js Offers:
+1. Server-Side Rendering (SSR): In Next.js, the very first request returns the HTML *with* the blogs already populated. (How it does this is a different topic).
+2. API Routes: A single codebase containing both frontend and backend logic.
+3. File-Based Routing: No need for `react-router-dom`. Creating a file automatically creates a route.
+4. Bundle Size Optimizations.
+5. Static Site Generation (SSG).
+
+Next.js Downside:
+It cannot always be distributed simply via a CDN. Because it does Server-Side Rendering, it requires a Node.js server to be actively running. It is also hard to move a project out of Next.js back into standard React or another framework.
+
+Deployment Architecture differences:
+1. React (CSR): Only static files (HTML, CSS, JS bundle inside `/dist` folder) are needed to serve the project. 
+ - It doesn't need a running server; it can be deployed cheaply on a CDN (Content Delivery Network). 
+ - No backend logic runs to serve the frontend.
+
+2. Next.js (SSR): Requires a running Next.js server to dynamically generate the HTML on every request.
+
+
+Getting Started with Next.js:
+Command: `npx create-next-app@latest`
+Configuration choices during setup:
+- TypeScript: Yes
+- ESLint: Yes
+- Tailwind CSS: Yes
+- `src/` directory: Yes
+- App Router: Yes (Recommended)
+- Turbopack: No (For now)
+- Import alias (`@/*`): Yes
+
+Folder Structure:
+src/
+  app/
+    page.tsx (This acts as the root route '/')
+    users/
+      page.tsx (Acts as route '/users')
+    todos/
+      page.tsx (Acts as route '/todos')
+
+To avoid code duplication, you can create a labeled input component.
+Create `signup` and `signin` directories, and put `page.tsx` inside them.
+
+Server Components in Next.js:
+You can make a React component `async` in Next.js (because they run on the server).
+Example fetching blogs directly in the component:
+
+```tsx
+// npm i axios
+import axios from 'axios';
+
+async function getBlogs() {
+  const response = await axios.get("https://...");
+  return response.data;
+}
+
+export default async function Blogs() {
+  const blogs = await getBlogs();
+  return (
+    <div>
+      {JSON.stringify(blogs)}
+    </div>
+  );
+}
+```
+
+Client Components and `useEffect`:
+`useEffect` does NOT run on the server side; it only runs on the client side.
+If you use `useEffect` to fetch data (like in standard React):
+```tsx
+export default function Blogs() {
+  const [blogs, setBlogs] = useState([]);
+
+  useEffect(() => {
+    axios.get("/api/blogs").then(res => setBlogs(res.data));
+  }, []);
+
+  return <div>{blogs}</div>;
+}
+```
+If you do this, you lose the primary benefit of Next.js Server-Side Rendering. The initial HTML will be empty until the client fetches the data.
+
+Next.js `<Link>` component:
+Automatically prefetches the linked page in the background for faster navigation.
+
+Side Note: Sending Emails with React
+You can send HTML in emails, but you cannot send JavaScript. Email clients ignore `<script>` tags for security.
+If you have an email template written in React, you can use `ReactDOMServer` to render the React component into raw HTML on the backend *before* sending the email.
+
+Layouts (`layout.tsx`):
+- `layout.tsx` contains global configurations like fonts and metadata (title, description).
+- The Root Layout defines the overarching HTML structure.
+- You can add shared UI elements, like a Navbar, to the layout folder so it persists across pages.
+
+Example Layout Component:
+```tsx
+export default function AuthLayout({ children }) {
+  return (
+    <div>
+      <Navbar />
+      {children}
+    </div>
+  );
+}
+```
+You can have the main layout and nested sub-layouts for different parts of your application.
+
+Timeline:
+00:01:17 - NextJS intro, Pre-requisites
+00:12:46 - SEO Optimisation
+00:21:57 - Waterfalling problem
+00:26:35 - Next.js offerings
+00:37:50 - Bootstrap a Next app
+00:43:54 - Routing in Next
+00:53:38 - Prettify the signin page
+00:55:43 - Server side rendering
+01:07:40 - Q&A
+01:17:53 - Layouts
+01:31:20-02:01:38 - Conclusion and Q&A
