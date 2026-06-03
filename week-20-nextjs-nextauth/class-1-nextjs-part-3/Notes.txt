@@ -1,0 +1,96 @@
+Week 20.1 
+Next.js Part 3 (Class 1)
+
+Topics Covered:
+1. Route Groups
+2. Dynamic Segments & Catch-all Segments
+3. Middleware in Next.js
+4. Static Site Generation (SSG)
+5. Hydration
+
+1. Route Groups
+In Next.js, enclosing a folder name in parentheses creates a "Route Group" (e.g., `(auth)`).
+This allows you to organize your files and apply a common `layout.tsx` to a group of routes without affecting the URL structure.
+
+Example structure:
+app/
+  (auth)/
+    layout.tsx
+    signin/
+      page.tsx
+    signup/
+      page.tsx
+  users/
+    page.tsx
+
+- `localhost:3000/signin` -> The `(auth)/layout.tsx` is applied here.
+- `localhost:3000/users` -> The `(auth)/layout.tsx` is NOT applied here.
+The URL does not include `auth` (i.e., `localhost:3000/auth/signin` is incorrect).
+
+2. Dynamic Routers & Catch-all Segments
+Dynamic Route: `[slug]` defines a dynamic route.
+You can access the URL parameter via `params.slug`.
+
+Example: `app/blog/[postId]/page.tsx`
+```tsx
+export default async function BlogPage({ params }: { params: { postId: string } }) {
+  // `params` is a promise in modern Next.js and needs to be awaited first.
+  const { postId } = await params;
+  
+  // Fetch data using the dynamic ID
+  const response = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}`);
+  const data = response.data;
+
+  return <div>Blog Post Page {postId} - {JSON.stringify(data)}</div>;
+}
+```
+Note: We do not use `useEffect` here because this is a Server Component.
+
+Catch-All Segments `[...slug]`:
+Normally, you cannot have two folders handling the same route level, as it causes a build conflict.
+Catch-all segments handle nested dynamic routes.
+
+Example: `app/courses/[...courseId]/page.tsx`
+This will match:
+- `localhost/courses/1`
+- `localhost/courses/14/2/3`
+But it will NOT match the root `localhost/courses`.
+
+Optional Catch-All `[[...courseId]]`:
+If you use double brackets, it will handle nested routes AND the root route.
+Matches:
+- `localhost/courses/14/2/3`
+- `localhost/courses`
+
+3. Static Site Generation (SSG)
+- Client-Side Rendering (CSR): Used in React (e.g., standard `useState` counters).
+- Server-Side Rendering (SSR): Generates HTML dynamically on the server for each request.
+- Static Site Generation (SSG): Generates the HTML once at build time. It is never generated again unless rebuilt. Used for content that doesn't change often.
+
+When you run `npm run build`:
+- `○ (Static)`: Pages are pre-rendered as static HTML files.
+- `ƒ (Dynamic)`: Pages are server-rendered on demand.
+
+Static pages are incredibly fast because during the build process, Next.js generates and stores the HTML files. When a request comes in, the server simply serves the pre-built HTML file without needing to run any rendering logic or database queries.
+
+4. Hydration
+Client components can re-render over time. Server components generally do not change after the initial render.
+If you declare `"use client"` at the top of a component, it becomes a Client Component.
+
+Layout Rule:
+If a parent component is a Client Component, all of its child components automatically become Client Components. Therefore, it is bad practice to make your top-level layout or page a Client Component just to add a small piece of interactivity (like a 'Like' button). 
+Instead, extract the interactive part into its own small Client Component and import it into the Server Component.
+
+Hydration Error:
+"Hydration failed because the rendered HTML didn't match the client."
+This error occurs if the Server Component generates HTML on the server, but when the Client Component tries to attach event listeners (hydrate) on the frontend, the DOM tree it expects doesn't match what the server actually sent.
+
+
+Context:
+08:41 Route groups ()
+28:24 Dynamic Routes [ ]
+41:34 Catch all segment […]
+54:40 Catch All segment [[…slug]]
+01:02:55 CSR vs SSR vs Static Site Generation
+01:36:38 Hydration
+02:05:23 To be continued…

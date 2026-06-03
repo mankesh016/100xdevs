@@ -1,0 +1,112 @@
+Week 20.2
+Next Auth
+
+How do you implement login with Google, Facebook, or Email/Password?
+In Node.js/Express, we used libraries like Passport.js.
+In Next.js, we use NextAuth.js.
+
+What is NextAuth?
+NextAuth is a complete authentication library specifically built for Next.js.
+Can you build authentication in Next.js without NextAuth? Yes.
+Should you? No!
+
+Popular Authentication Choices:
+1. External Providers (Expensive): Auth0, Clerk. (These handle everything for you; developer life is very easy, but they charge heavily per user. ChatGPT uses Auth0).
+2. Firebase Auth (Cheaper alternative).
+3. In-house using cookies (Complex to build securely).
+4. NextAuth (The Next.js standard for implementing in-house or OAuth providers easily).
+
+Why not just use LocalStorage for JWTs like in React?
+In standard React (CSR), the browser sends an API request, receives a JWT, stores it in LocalStorage, and attaches it to subsequent requests.
+In Next.js (SSR), the very FIRST request from the browser is a GET request for the HTML page. This initial request cannot contain headers built from LocalStorage. 
+Next.js server needs to know who you are (via Cookies) *before* it generates the HTML profile page. 
+Because the Server cannot access the Client's LocalStorage, relying on LocalStorage for authentication in Next.js Server Components is impossible. If you want to use LocalStorage, you must do purely Client-Side Rendering, defeating the purpose of Next.js.
+
+Getting Started with NextAuth
+`npx create-next-app@latest`
+`npm install next-auth`
+
+File Structure for NextAuth:
+Create this exact file path: `app/api/auth/[...nextauth]/route.ts`
+
+```typescript
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+
+const handler = NextAuth({
+  providers: [
+    CredentialsProvider({
+      name: "Email",
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        // Add database logic here to verify user
+        // e.g., const user = await prisma.user.findFirst({ ... })
+        // return user;
+        return { id: "1", name: "Alice", email: "alice@gmail.com" };
+      }
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || ""
+    })
+  ]
+});
+
+export { handler as GET, handler as POST };
+```
+
+Showing Login/Logout state in the UI:
+To access the session in a Client Component, you must use the `useSession` hook.
+However, to use `useSession`, your app must be wrapped in a `<SessionProvider>` (similar to Context API or Recoil providers).
+
+```tsx
+// app/providers.tsx
+"use client";
+import { SessionProvider } from "next-auth/react";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return <SessionProvider>{children}</SessionProvider>;
+}
+```
+
+Accessing Session in a Server Component:
+Server components do not need the `<SessionProvider>`. You can fetch the session directly on the server.
+
+```tsx
+// app/page.tsx
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+
+export default async function Home() {
+  const session = await getServerSession();
+  
+  if (!session?.user) {
+    // If not logged in, redirect to the NextAuth default signin page
+    redirect("/api/auth/signin");
+  }
+
+  return (
+    <div>
+      <h1>Home Page</h1>
+      <pre>{JSON.stringify(session)}</pre>
+    </div>
+  );
+}
+```
+
+Remaining Topics for later:
+- Callbacks in NextAuth
+- Connecting NextAuth to a Database (Prisma Adapter)
+
+
+01:52 What is Next auth?
+19:05 Coding: JWT + localStorage + header (BAD way of auth in next) ❌
+45:14 NextAuth (Providers)
+49:58 Catch All Routes
+53:00 NextAuth access to Catch-All […nextauth]
+01:21:06 useSession(NextAuth)
+01:53:36 Wrapped
