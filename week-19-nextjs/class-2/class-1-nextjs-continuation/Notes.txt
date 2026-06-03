@@ -1,0 +1,84 @@
+Week 19.1 
+Next.js Continuation (Part 2)
+
+In Next.js, you can create a backend; you don't need Express.
+- Landing pages should typically be in Next.js (for SEO and initial load speed).
+- Internal dashboards can be in React (as SEO is not a priority for logged-in users).
+
+Full-Stack Capabilities of Next.js:
+- Frontend: The app can respond with HTML.
+- Backend: The app can respond with JSON.
+
+Benefits of a unified framework:
+- No CORS issues because there is a single domain name for both the frontend and backend.
+- Using `app.use(cors())` in Express without specifying domains is highly insecure. You should always explicitly tell the server the exact domains to allow requests from. Next.js bypasses this entirely since requests are same-origin.
+
+Deployment Architecture differences:
+- React (Frontend only): Deployed on S3 or any Object Store / CDN.
+- Next.js (Fullstack / SSR): Deployed on EC2 / Virtual Machines / Node.js runtime environments (like Vercel).
+
+Creating a Next.js App:
+npx create-next-app@latest
+- Put code in the `src` directory.
+- Use the 'App Router'. (The 'Pages router' is the old way. The App router is the new standard, and most apps are migrating to it).
+
+Server Components vs. Client Components:
+By default, every component in the App Router is a Server Component.
+Adding `"use client"` at the top of a file converts it to a Client Component.
+If you are using hooks like `useState` or `useEffect`, or attaching event listeners (like onClick), you MUST convert the component to a Client Component.
+
+How Server Components Work:
+1. Browser requests the user page.
+2. Next.js Server fetches user data from the Database/Backend.
+3. Next.js Server renders the HTML page with the user details already included.
+4. The server returns the fully formed HTML to the browser.
+
+Example of an Async Server Component:
+```tsx
+export default async function User() {
+  const response = await axios.get("backend_uri");
+  console.log("hi");
+  return <div>{response.data}</div>
+}
+```
+Note: Because there is no `"use client"` directive, it is a server component by default. The server runs it and only sends the generated HTML data to the user.
+Important: The `console.log("hi")` will NOT print in the browser's console. It will print on the Server's terminal.
+
+Async components weren't a thing in standard React. Next.js introduced them. With server components, we got rid of a lot of state management libraries. We still have libraries like Recoil, but they are rarely needed for data fetching now.
+
+Handling Loading States in Next.js:
+In React, we use `if/else` conditions to show a Loader while data is fetching/awaiting. 
+In Next.js, if the backend is taking 5 seconds to respond, the request will be stuck, and nothing will show initially until the data resolves. Either nothing renders, or everything renders.
+To handle this in Next.js, we create a `loading.tsx` file in the same directory as the `page.tsx`. If `page.tsx` has lots of `await` statements causing a delay, `loading.tsx` works automatically as a fallback UI (like a skeleton loader).
+
+File Structure Example:
+app/
+  users/
+    page.tsx
+    loading.tsx
+
+Creating API Routes in Next.js:
+To return JSON (backend behavior), create a `route.ts` file. 
+File Path: `app/api/v1/user/details/route.ts`
+```typescript
+import { NextResponse } from "next/server";
+
+export async function GET() {
+  return NextResponse.json({
+    name: "Alice",
+    username: "Alice123",
+    email: "alice@gmail.com"
+  });
+}
+```
+This is a `.ts` file (not `.tsx`) because it doesn't contain HTML/JSX.
+If you send a GET request to `localhost:3000/api/v1/user/details`, you will get back JSON data.
+
+Fetching the Internal API Route:
+```tsx
+export default async function User() {
+  const res = await axios.get("http://localhost:3000/api/v1/user/details");
+  const data = res.data;
+  return <div>{JSON.stringify(data)}</div>
+}
+```

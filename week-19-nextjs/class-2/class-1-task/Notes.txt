@@ -1,0 +1,93 @@
+Routing and Prisma, 
+
+Routing and Navigation:
+`<Link href="/signin">Sign In</Link>`
+The `<Link>` tag in Next.js is similar to the `<a>` tag in HTML, but optimized (it prefetches the page in the background).
+
+Another (programmatic) way to route:
+```tsx
+import { useRouter } from "next/navigation";
+
+export default function Home() {
+  const router = useRouter();
+  // Note: Programmatic routing via useRouter cannot take advantage of prefetching on hover like the <Link> tag does.
+  return <button onClick={() => router.push("/signin")}>Sign In</button>
+}
+```
+
+Form Handling (Using useRef in a Client Component):
+```tsx
+const userRef = useRef<HTMLInputElement>(null);
+<input ref={userRef} type="text" />
+
+// Sign In Button onClick Logic
+axios.post("/api/v1/signup", {
+  username: userRef.current?.value
+});
+```
+
+API Route for Signup (POST Request):
+`app/api/v1/signup/route.ts`
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest) {
+  const data = await req.json();
+  // using prisma
+  // await prisma.user.create({ data });
+  return NextResponse.json({
+    message: "User Registered Successfully."
+  });
+}
+```
+
+Prisma Setup in Next.js:
+Follow the official documentation: https://www.prisma.io/docs/guides/frameworks/nextjs
+`npm install prisma @prisma/client`
+`npx prisma init`
+`npx prisma migrate dev`
+`npx prisma generate`
+
+Direct Database Access from Server Components:
+Server components never go to the client; only the processed HTML is sent. Therefore, you do not always need to create an API endpoint (like `/api/user`) just to fetch data for a page. You can make a direct database call from the component itself!
+
+```tsx
+import prisma from "@/lib/prisma";
+
+export default async function UserDetails() {
+  // Instead of: await axios.get("http://localhost:3000/api/user")
+  // Just query the DB directly:
+  const user = await prisma.user.findFirst();
+  return <div>{user?.username}</div>;
+}
+```
+
+The "Too Many Database Connections" Problem in Next.js (Dev Mode):
+When you are coding locally in development mode, every time you save a file, Next.js performs Fast Refresh. If you initialize the Prisma Client directly in your route files, a new database connection is created on every save. This will quickly exhaust your database connection limit.
+Note: This problem does not occur in production (`npm run start`) because files are not constantly recompiling.
+
+Solution: The Singleton Pattern
+(A singleton means a specific object is instantiated only once).
+Create a separate file: `app/lib/db.ts`
+
+
+```typescript
+import { PrismaClient } from '@prisma/client'
+
+const prismaClientSingleton = () => {
+  return new PrismaClient()
+}
+
+declare global {
+  var prisma: undefined | ReturnType<typeof prismaClientSingleton>
+}
+
+const prisma = globalThis.prisma ?? prismaClientSingleton()
+
+export default prisma
+
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.prisma = prisma
+}
+```
+We add this Singleton pattern specifically for development mode to prevent connection exhaustion.
