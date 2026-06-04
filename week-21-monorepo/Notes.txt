@@ -1,0 +1,143 @@
+Week 21: Monorepos and Turborepo
+
+--- Class 1: Introduction to Monorepos and Turborepo ---
+
+Monorepo vs. Separate Repos
+- Monorepo: Everything is kept in a single repository (Frontend, Backend, DevOps, etc.).
+- Separate Repos: Separate repositories for frontend, backend, devops, etc.
+- In a monorepo, traditionally, every commit triggers deployment for both frontend and backend, but there are tools and ways to control this.
+- Turborepo is not just another monorepo framework; it's a tool/layer that people highly prefer for managing monorepos efficiently.
+
+Why not use simple folders?
+Why can't I just store services (backend/frontend) in a top-level folder without a monorepo tool?
+You can, and you should ONLY IF the frontend and backend do not share any code and do not depend on each other (e.g., Frontend written in React, Backend written in Go).
+
+When Do You Need a Monorepo?
+1. Shared Code: When you want to reuse code (like Types, Zod schemas, or UI components) between the frontend and backend.
+2. Enhanced Collaboration: Easier for full-stack developers to work across the stack.
+3. Optimized Builds and CI/CD: Tools like Turborepo offer smart caching and task execution strategies that can significantly reduce build and testing times. (Reducing build time saves money).
+4. Centralized Tooling and Configuration: Managing build tools, linters (ESLint), formatters (Prettier), and other configurations is simpler because you can have a single set of tools for the entire project.
+
+Common Monorepo Frameworks in Node.js
+1. Lerna
+2. Nx
+3. Turborepo (Not exactly a monorepo framework by itself, but a layer orchestrator on top).
+4. Yarn/NPM Workspaces.
+(Turborepo works seamlessly alongside NPM/Yarn/PNPM workspaces).
+
+Build Systems vs. Build System Orchestrators
+- Build System: Automates the process of transforming source code written by developers into executable or transpiled code.
+  - C++ uses the `gcc` compiler to output binary code.
+  - GoLang uses the Go compiler to output binary code.
+  - TypeScript uses the `tsc` compiler to output JavaScript.
+  - React (JSX/TSX) uses tools like Vite/Next.js to output HTML, CSS, and JS.
+- Build System Orchestrator: Turborepo acts as a build system orchestrator. Rather than directly building the code, it tells the system *when* to build *what*. The actual tools (like Vite, tsc) perform the build actions.
+
+Turborepo Key Features
+1. Caching: Caches the output of tasks. This can significantly speed up build times, especially in Continuous Integration (CI) environments. Serving a Next.js process is not heavy, but building a Next.js project is heavy (an EC2 machine can crash during a heavy build without proper caching).
+2. Parallelization: It can run independent tasks in parallel, making efficient use of machine resources and cutting down build time.
+3. Dependency Graph Awareness (DAG): It builds a Directed Acyclic Graph (DAG) of the monorepo dependencies to run tasks in the correct, optimized order. Unlike Lerna, which might rebuild all files because it's unaware of exactly what changed, Turborepo is smart.
+
+Let's Code: Initializing a Turborepo
+Command: `npx create-turbo@latest`
+- Choose a package manager (npm, yarn, pnpm). If you have enough disk space, pnpm is a great choice.
+
+Standard Folder Structure:
+- `apps/` : Contains end-user applications (e.g., `docs`, `web`).
+- `packages/` : Contains shared code and configurations (e.g., `ui`, `eslint-config`, `typescript-config`).
+
+Creating Shared Components:
+Inside `packages/ui/src/button.tsx`, you can create a common Button component.
+In your apps (e.g., `apps/web`), you can import it like: `import { Button } from "@repo/ui/button"`.
+
+Running Builds:
+Run `yarn build` or `npm run build`. 
+If you build once, and then run `yarn build` again without changing anything, it will complete in milliseconds (e.g., 35ms) because Turborepo fetches the result directly from the cache.
+
+Root package.json Configuration:
+```json
+"scripts": {
+  "build": "turbo build",
+  "dev": "turbo dev",
+  "lint": "turbo lint"
+},
+"workspaces": [
+  "apps/*",
+  "packages/*"
+]
+```
+NPM workspaces handle the package linking, while Turbo handles the build orchestration.
+
+---------------------------------------------------------------------------------------------------------------------
+--- Class 2: Monorepo Backend & UI Setup ---
+
+Creating a Chat App in a Monorepo
+Command: `npx create-turbo@latest chat-app`
+- Delete `apps/docs` as we don't need it.
+- Create two new folders in `apps/`: `ws-server` (WebSocket Server) and `http-server` (Express Server).
+
+Shared UI Package Setup:
+1. Create generic UI components (like `TextInput`, `InputBox`, `Button`) inside the `packages/ui` package.
+2. Make sure to export these components via the UI directory's `package.json` so they are accessible to other workspaces.
+3. Import the generic component in your Next.js/React app (`apps/web`):
+   `import { Button } from "@repo/ui/button"`
+   (Note: `@repo/ui` is the custom name given at the top of the UI package's `package.json`).
+
+Routing in Next.js:
+Use `useRouter()` to navigate the user to `/chat/[roomId]`.
+Handle the endpoint logic inside `app/chat/[roomId]/page.tsx`.
+
+Tailwind CSS in a Monorepo:
+If there is no `tailwind.config.js` file set up globally, Tailwind classes will not be applied to the shared UI components. You can either configure Tailwind to scan the `packages/ui` folder, or use inline vanilla CSS. Setting up Tailwind in a monorepo can be a bit tricky because the UI components are located in a different directory than the main app pages.
+
+Setting up the Backends (`http-server` & `ws-server`)
+1. Initialize the project in each backend folder: `npm init -y` and `npx tsc --init`.
+2. Create `src/index.ts`.
+3. Move common TypeScript compiler options to `packages/typescript-config/backend.json` (remove any comments in the JSON to avoid parsing errors).
+4. In the backend's `tsconfig.json`, extend the shared config:
+   `"extends": "@repo/typescript-config/backend.json"`
+5. Install necessary dependencies:
+   - For ws-server: `npm i ws @types/ws`
+   - For http-server: `npm i express @types/express`
+6. Add build and dev scripts to their respective `package.json` files so Turborepo can execute them:
+   `"build": "tsc -b"`
+   `"dev": "tsc -b && node dist/index.js"`
+
+Fixing TS Config Paths:
+In the shared `backend.json`, if `rootDir` is set to `./src` and `outDir` is set to `./dist`, it might confuse the compiler relative to the current workspace. To fix this, explicitly write `rootDir` and `outDir` in the specific app's `tsconfig.json` where you extend the shared configuration.
+
+Always test your setup manually first (e.g., run `tsc -b && node dist/index.js`) to ensure it runs correctly before relying on Turbo.
+
+Turborepo Configuration (`turbo.json`)
+The `turbo.json` file at the root level defines task pipelines.
+- `"dependsOn"`: Specifies task dependencies (e.g., build packages before building the app).
+- `"outputs"`: Tells Turborepo which folders/files to cache.
+
+Caching Configuration:
+By default, a Next.js app outputs to `.next/**`. However, because we are now running Node.js applications as well, they output compiled code to `dist/**`. We must include `dist/**` in our outputs so Turborepo knows to cache it.
+Example: `"outputs": [".next/**", "!.next/cache/**", "dist/**"]`
+- We include `.next/**` and `dist/**` (Cache these).
+- We exclude `!.next/cache/**` (Do NOT cache this).
+
+If you delete the `.next` or `dist` folder and re-run the build, Turborepo instantly restores them from the cache.
+
+Cache Invalidation (`inputs`):
+```json
+"inputs": ["$TURBO_DEFAULT$", ".env", ".env.local"]
+```
+If anything in the project's source code or the environment variables (`.env`) changes, Turborepo will invalidate the cache and rebuild the app.
+
+Overriding turbo.json per Workspace:
+Instead of putting everything in the root `turbo.json`, you can create or override a `turbo.json` file inside a specific app's folder to define localized tasks:
+```json
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**"]
+    }
+  }
+}
+```
+
+(Note: Next Actions and Middlewares are remaining topics to be covered).
