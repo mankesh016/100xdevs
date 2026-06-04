@@ -7,7 +7,6 @@ This repository tracks my progress through the **100xdevs** cohort. It contains 
 - **Frontend:** HTML5, CSS3, JavaScript, React.js
 - **Backend:** Node.js, Express, Middlewares, Authentication (JWT)
 - **Database:** MongoDB, PostgreSQL (Prisma ORM)
-- **DevOps:** Docker, Turborepos, CI/CD, AWS
 
 ---
 
@@ -33,7 +32,9 @@ This repository tracks my progress through the **100xdevs** cohort. It contains 
 | **Week 16** | **Websockets**             | Mastered WebSockets for bi-directional, low-latency communication.             |
 | **Week 17** | **PostgreSQL**             | Schema design, Relationships, Joins, and Transactions.                         |
 | **Week 18** | **Prisma ORM & SSR**       | Migrated to Prisma ORM for type-safe DB queries and started Next.js.           |
-| **Week +**  | **...**                    | _Pushing daily - Updates incoming..._                                          |
+| **Week 19** | **Next.js Fundamentals**   | Deep dive into Server-Side Rendering (SSR), App Router, and Server Components. |
+| **Week 20** | **Next.js Auth**           | Implemented NextAuth.js, Route Groups, and Static Site Generation (SSG).       |
+| **Week 21** | **Monorepo & Turborepo**   | Architected a full-stack Monorepo using Turborepo with shared UI packages.     |
 
 ---
 
